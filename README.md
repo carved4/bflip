@@ -1,14 +1,15 @@
 # bflip
 
-flip a single bit in a windows kernel driver's pe checksum field to generate a new file hash while preserving code signing and functionality.
+generate multiple unique hashes of a windows kernel driver by randomizing the pe checksum field while preserving code signing and functionality.
 
 ## what it does
 
 - finds the pe checksum field in a .sys driver file
-- randomly flips one bit in the 4-byte checksum
-- generates a completely different sha256 hash
+- generates random uint32 values to write to the checksum
+- creates completely different sha256 hashes for each file
 - keeps the authenticode signature valid
 - driver loads and runs exactly the same
+- can generate up to 2^32 (4,294,967,296) unique variations
 
 ## why this works
 
@@ -20,31 +21,50 @@ this means:
 - both load normally with secure boot + hvci enabled
 
 ## usage
+
+### generate a single file
 ```bash
-bflip.exe vulnerable_driver.sys
+bflip.exe -f vulnerable_driver.sys
 ```
 
-output:
+### generate multiple files
+```bash
+bflip.exe -f vulnerable_driver.sys -n 10
 ```
-$ ./b.exe wsftprm.sys
-Processing file: wsftprm.sys
+
+### example output
+```
+$ ./b.exe -f wsftprm.sys -n 1
+processing file: wsftprm.sys
 [+] original file hash: ff5dbdcf6d7ae5d97b6f3ef412df0b977ba4a844c45b30ca78c0eeb2653d69a8
 [+] original file size: 38816 bytes
-[+] flipping bit 1 in checksum byte 2 (absolute offset 330)
-[+] checksum field value changed: 0x0000C475 -> 0x0002C475
+[+] original checksum: 0x0000C475
+[+] checksum offset: 328 (0x148)
 
- bit flip completed:
-[+]  target: pe checksum field
-[+]  offset: 330 (0x14A)
-[+]  bit: 1
-[+]  original byte: 0x00
-[+]  modified byte: 0x02
+generating 1 file(s)...
 
-file saved as: wsftprm_flipped_20251021_144444.sys
-original hash: ff5dbdcf6d7ae5d97b6f3ef412df0b977ba4a844c45b30ca78c0eeb2653d69a8
-modified hash: 1e843c4ef0a2a99aa3754902fad52630902220da9776366951668e15a497860d
-[+] you may reuse this vulnerable driver if original hash gets blocked
+[1/1] checksum: 0xF44CACAC | hash: ed0f8a4ec047bdee... | signature: valid
 
+============================================================
+generation summary
+============================================================
+original file:       wsftprm.sys
+original hash:       ff5dbdcf6d7ae5d97b6f3ef412df0b977ba4a844c45b30ca78c0eeb2653d69a8
+original checksum:   0x0000C475
+
+files generated:     1
+unique hashes:       1
+valid signatures:    1
+invalid signatures:  0
+success rate:        100.00%
+
+------------------------------------------------------------
+theoretical maximum: 2^32 = 4294967296 possible variations
+collision space:     0.00000002% explored
+
+------------------------------------------------------------
+[+] you may reuse these vulnerable drivers if original hash gets blocked
+============================================================
 ```
 
 ## use cases
@@ -61,16 +81,18 @@ modified hash: 1e843c4ef0a2a99aa3754902fad52630902220da9776366951668e15a497860d
 
 ## build
 ```bash
-go build bflip.go
+go build main.go
 ```
 
 ## notes
 
 - only works on signed drivers (unsigned drivers don't benefit from this)
 - the pe checksum field is never validated by windows for driver loading
-- flipped drivers maintain identical functionality and valid signatures
+- modified drivers maintain identical functionality and valid signatures
 - test mode not required - works with secure boot enabled
-- each run produces a different hash due to random bit selection
+- each file gets a random uint32 checksum, producing unique hashes
+- theoretical maximum of 2^32 (4,294,967,296) unique variations per driver
+- output files are named with timestamp and sequential numbering
 
 ## disclaimer
 
