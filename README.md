@@ -101,4 +101,4 @@ this tool is for security research and authorized testing only. don't use it to 
 ---
 
 *made with <3 for understanding authenticode quirks*
->inspired by Silver Fox and thehackernews [(https://thehackernews.com/2025/09/silver-fox-exploits-microsoft-signed.html)]
+>inspired by Silver Fox and thehackernews https://thehackernews.com/2025/09/silver-fox-exploits-microsoft-signed.html
