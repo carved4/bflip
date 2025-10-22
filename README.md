@@ -34,7 +34,7 @@ bflip.exe -f vulnerable_driver.sys -n 10
 
 ### example output
 ```
-$ ./b.exe -f wsftprm.sys -n 1
+$ ./bflip.exe -f wsftprm.sys -n 1
 processing file: wsftprm.sys
 [+] original file hash: ff5dbdcf6d7ae5d97b6f3ef412df0b977ba4a844c45b30ca78c0eeb2653d69a8
 [+] original file size: 38816 bytes
